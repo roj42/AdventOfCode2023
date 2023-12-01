@@ -17,11 +17,13 @@ func log(s string) {
 
 func main() {
 
+	//did we remember to put an arg of the day?
 	if len(os.Args) < 2 || os.Args[1] == "" {
 		panic("you forgot the day, sport")
 	}
 	dayInput := os.Args[1]
 
+	//open the day's file, and close it when we're done with main, here.
 	fileName := "./data/" + dayInput + ".txt"
 
 	file, err := os.Open(fileName)
@@ -29,6 +31,7 @@ func main() {
 	log("opened " + fileName)
 	defer file.Close()
 
+	//WHAT DAY IS IT?
 	switch dayInput {
 	case "1":
 		fmt.Println(day1(file))

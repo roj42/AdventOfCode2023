@@ -8,42 +8,57 @@ import (
 	"strings"
 )
 
+// proccess day 1. On each line, pull out the "outsidemost" digits, so e14gggt9 is 1 and 9 so 19.
+// A single digit is both left and right outermost, natch
 func day1(file *os.File) string {
+	//use a fancy scanner from buffed io, which makes me think of toads.
 	scanner := bufio.NewScanner(file)
-	// optionally, resize scanner's capacity for lines over 64K?
-	lineTotal := 0
+	// optionally, resize scanner's capacity for lines over 64K? I hope I never need this note.
+
+	//pre declare output at 0
+	grandTotal := 0
+	//fancy scanner iteration
 	for scanner.Scan() {
 		log("line:" + scanner.Text())
-		lineTotal += processLineDay1(scanner.Text())
+		//process each line in a sub fucntion so I don't go nuts.
+		grandTotal += processLineDay1(scanner.Text())
 	}
 
-	log("File total: " + fmt.Sprint(lineTotal))
-
+	//scanner is weird about errors. It will kick us out of the loop that .Scan() produces if there is one, so yay
 	if err := scanner.Err(); err != nil {
 		check(err)
 	}
-	return fmt.Sprint(lineTotal)
+
+	//just noticed I log and then output it at the end as well. Whatever.
+	log("File total: " + fmt.Sprint(grandTotal))
+	return fmt.Sprint(grandTotal)
 }
 
+// process line will turn a single line into the outermost sum
 func processLineDay1(input string) int {
+	//placeholder first one
 	first := ""
+	//placeholder second one
 	last := ""
 	log("==LINE " + input + "==")
 	msg := "found: "
-	for _, char := range input {
-		stringchar := string(char)
-		_, e := strconv.Atoi(stringchar) //gross
+	//range is neat, and produces the for-suff for us. Here it gives us "runes" of each string
+	for _, char := range input { //I obviously think of runes as characters
+		stringchar := string(char)       //convert back to a string onces, we use this string form a bunch.
+		_, e := strconv.Atoi(stringchar) //gross. Try to convert to an int. We don't care what the number is, but if there's no error...
 		if e == nil {                    // it's an int
-			msg += " " + stringchar
-			if first == "" {
+			msg += " " + stringchar //log it
+			if first == "" {        // save it if it's leftmost
 				first = stringchar
 			}
-			last = stringchar
+			last = stringchar //this is the rightmost thus far
 		}
-	}
+	} //done parsing the line
 	log(msg)
 
+	//so, slap the first and last digits together, and then convert THAT to an integer
 	total, err := strconv.Atoi(first + last)
+	//man, I hope that worked. Vomit if not.
 	check(err)
 	log("==LINE TOTAL " + fmt.Sprint(total) + "==")
 	return total
@@ -53,19 +68,19 @@ func processLineDay1(input string) int {
 func day1_2(file *os.File) string {
 	scanner := bufio.NewScanner(file)
 
-	lineTotal := 0
+	grandTotal := 0
 	for scanner.Scan() {
 		log("line:" + scanner.Text())
 
-		lineTotal += processLineDay1_2(scanner.Text())
+		grandTotal += processLineDay1_2(scanner.Text())
 	}
 
-	log("File total: " + fmt.Sprint(lineTotal))
+	log("File total: " + fmt.Sprint(grandTotal))
 
 	if err := scanner.Err(); err != nil {
 		check(err)
 	}
-	return fmt.Sprint(lineTotal)
+	return fmt.Sprint(grandTotal)
 }
 
 func processLineDay1_2(input string) int {
