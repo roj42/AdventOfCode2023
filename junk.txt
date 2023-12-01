@@ -1,0 +1,156 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"unicode/utf8"
+)
+
+func day1(file *os.File) string {
+	scanner := bufio.NewScanner(file)
+	// optionally, resize scanner's capacity for lines over 64K?
+	lineTotal := 0
+	for scanner.Scan() {
+		log("line:" + scanner.Text())
+		lineTotal += processLineDay1(scanner.Text())
+	}
+
+	log("File total: " + fmt.Sprint(lineTotal))
+
+	if err := scanner.Err(); err != nil {
+		check(err)
+	}
+	return fmt.Sprint(lineTotal)
+}
+
+func processLineDay1(input string) int {
+	first := ""
+	last := ""
+	log("==LINE " + input + "==")
+	msg := "found: "
+	for _, char := range input {
+		stringchar := string(char)
+		_, e := strconv.Atoi(stringchar) //gross
+		if e == nil {                    // it's an int
+			msg += " " + stringchar
+			if first == "" {
+				first = stringchar
+			}
+			last = stringchar
+		}
+	}
+	log(msg)
+
+	total, err := strconv.Atoi(first + last)
+	check(err)
+	log("==LINE TOTAL " + fmt.Sprint(total) + "==")
+	return total
+
+}
+
+func day1_2(file *os.File) string {
+	scanner := bufio.NewScanner(file)
+
+	lineTotal := 0
+	for scanner.Scan() {
+		log("line:" + scanner.Text())
+
+		lineTotal += processLineDay1_2(scanner.Text())
+		break
+	}
+
+	log("File total: " + fmt.Sprint(lineTotal))
+
+	if err := scanner.Err(); err != nil {
+		check(err)
+	}
+	return fmt.Sprint(lineTotal)
+}
+
+func processLineDay1_2(input string) int {
+	log("==LINE " + input + "==")
+	//step over the string, replacing "one" with "1" as you go.
+	runeInput := []rune(input)
+	convertedInput := []rune{}
+
+	for i := 0; i < len(runeInput); i++ { //let's do some c++ type shit
+		buf := make([]byte, 1)                 //gross
+		_ = utf8.EncodeRune(buf, runeInput[i]) //gross
+		_, e := strconv.Atoi(string(buf))  // gross
+		if e == nil { // it's an int
+			convertedInput = append(convertedInput, runeInput[i])
+		} else { // a digit. Send the next 5 to the word converter, and skip if you should
+
+
+		}
+	}
+
+	// msg := "found: "
+	// for i, char := range input {
+	// 	valueToAdd := ""
+	// 	stringchar := string(char)
+	// 	_, e := strconv.Atoi(stringchar) //gross
+	// 	if e == nil {                    // it's an int
+	// 		valueToAdd = stringchar
+
+	// 	} else {
+	// 		// it's not an int... is it a spelled out word?
+	// 		maxlen := i + 5
+	// 		if len(input) < maxlen {
+	// 			maxlen = len(input)
+	// 		}
+	// 		valueToAdd = wordToDigit(input[i:maxlen])
+	// 		//we're losing some process by checking the later words again, but fuck it
+	// 	}
+	// 	if valueToAdd != "" {
+	// 		msg += " " + valueToAdd
+	// 		if first == "" {
+	// 			first = valueToAdd
+	// 		}
+	// 		last = valueToAdd
+	// 	}
+	// }
+	// log(msg)
+
+	//feed this string to day 1
+	return processLineDay1(fmt.Sprint(convertedInput))
+
+}
+
+// scans a string for the descreet spelling of "one" to "nine" and
+// returns the single character numerical equivalent, "1" to "9"
+// and an int that is the length of the "word" for skipping
+// blank if none are found
+func wordToDigit(input string) (string, int) {
+	if strings.Contains(input, "one") {
+		return "1", 3
+	}
+	if strings.Contains(input, "two") {
+		return "2", 3
+	}
+	if strings.Contains(input, "three") {
+		return "3", 5
+	}
+	if strings.Contains(input, "four") {
+		return "4", 4
+	}
+	if strings.Contains(input, "five") {
+		return "5", 4
+	}
+	if strings.Contains(input, "six") {
+		return "6", 3
+	}
+	if strings.Contains(input, "seven") {
+		return "7", 5
+	}
+	if strings.Contains(input, "eight") {
+		return "8", 5
+	}
+	if strings.Contains(input, "nine") {
+		return "9", 4
+	}
+	return "", 0
+}
