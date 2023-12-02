@@ -3,17 +3,13 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
 
 // proccess day 1. On each line, pull out the "outsidemost" digits, so e14gggt9 is 1 and 9 so 19.
 // A single digit is both left and right outermost, natch
-func day1(file *os.File) string {
-	//use a fancy scanner from buffed io, which makes me think of toads.
-	scanner := bufio.NewScanner(file)
-	// optionally, resize scanner's capacity for lines over 64K? I hope I never need this note.
+func day1(scanner *bufio.Scanner) string {
 
 	//pre declare output at 0
 	grandTotal := 0
@@ -65,8 +61,7 @@ func processLineDay1(input string) int {
 
 }
 
-func day1_2(file *os.File) string {
-	scanner := bufio.NewScanner(file)
+func day1_2(scanner *bufio.Scanner) string {
 
 	grandTotal := 0
 	for scanner.Scan() {
