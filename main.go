@@ -14,7 +14,7 @@ func check(e error) {
 }
 
 func log(inputs ...any) {
-	fmt.Println(inputs)
+	fmt.Println(inputs...)
 }
 
 func main() {
@@ -25,9 +25,14 @@ func main() {
 	}
 	dayInput := os.Args[1]
 
+	testPrefix := ""
+	if len(os.Args) > 2 && os.Args[2] != "" {
+		testPrefix = "t"
+	}
+
 	filePrefix := strings.Split(dayInput, "_")[0]
 	//open the day's file, and close it when we're done with main, here.
-	fileName := "./data/" + filePrefix + ".txt"
+	fileName := "./data/" + filePrefix + testPrefix + ".txt"
 
 	file, err := os.Open(fileName)
 	check(err)
@@ -51,7 +56,8 @@ func main() {
 		fmt.Println(day3(scanner))
 	case "3_2":
 		fmt.Println(day3_2(scanner))
-
+	case "4":
+		fmt.Println(day3_2(scanner))
 	default:
 		log("no implementation for day: " + dayInput)
 	}
