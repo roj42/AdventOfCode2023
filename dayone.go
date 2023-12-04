@@ -15,7 +15,7 @@ func day1(scanner *bufio.Scanner) string {
 	grandTotal := 0
 	//fancy scanner iteration
 	for scanner.Scan() {
-		log("line:" + scanner.Text())
+		log("line:", scanner.Text())
 		//process each line in a sub fucntion so I don't go nuts.
 		grandTotal += processLineDay1(scanner.Text())
 	}
@@ -26,7 +26,7 @@ func day1(scanner *bufio.Scanner) string {
 	}
 
 	//just noticed I log and then output it at the end as well. Whatever.
-	log("File total: " + fmt.Sprint(grandTotal))
+	log("File total: ", grandTotal)
 	return fmt.Sprint(grandTotal)
 }
 
@@ -36,7 +36,7 @@ func processLineDay1(input string) int {
 	first := ""
 	//placeholder second one
 	last := ""
-	log("==LINE " + input + "==")
+	log("==LINE ", input, "==")
 	msg := "found: "
 	//range is neat, and produces the for-suff for us. Here it gives us "runes" of each string
 	for _, char := range input { //I obviously think of runes as characters
@@ -56,7 +56,7 @@ func processLineDay1(input string) int {
 	total, err := strconv.Atoi(first + last)
 	//man, I hope that worked. Vomit if not.
 	check(err)
-	log("==LINE TOTAL " + fmt.Sprint(total) + "==")
+	log("==LINE TOTAL ", total, "==")
 	return total
 
 }
@@ -65,12 +65,12 @@ func day1_2(scanner *bufio.Scanner) string {
 
 	grandTotal := 0
 	for scanner.Scan() {
-		log("line:" + scanner.Text())
+		log("line:", scanner.Text())
 
 		grandTotal += processLineDay1_2(scanner.Text())
 	}
 
-	log("File total: " + fmt.Sprint(grandTotal))
+	log("File total: ", grandTotal)
 
 	if err := scanner.Err(); err != nil {
 		check(err)
@@ -81,7 +81,7 @@ func day1_2(scanner *bufio.Scanner) string {
 func processLineDay1_2(input string) int {
 	first := ""
 	last := ""
-	log("==LINE " + input + "==")
+	log("==LINE ", input, "==")
 	msg := "found: "
 	for i, char := range input {
 		valueToAdd := ""
@@ -111,7 +111,7 @@ func processLineDay1_2(input string) int {
 
 	total, err := strconv.Atoi(first + last)
 	check(err)
-	log("==LINE TOTAL " + fmt.Sprint(total) + "==")
+	log("==LINE TOTAL ", fmt.Sprint(total), "==")
 	return total
 
 }

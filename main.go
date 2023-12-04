@@ -35,7 +35,7 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	// optionally, you canresize scanner's capacity for lines over 64K? I hope I never need this note.
+	// optionally, you can resize scanner's capacity for lines over 64K? I hope I never need this note.
 
 	//WHAT DAY IS IT?
 	switch dayInput {
@@ -47,6 +47,8 @@ func main() {
 		fmt.Println(day2(scanner))
 	case "2_2":
 		fmt.Println(day2_2(scanner))
+	case "3":
+		fmt.Println(day3(scanner))
 
 	default:
 		log("no implementation for day: " + dayInput)
