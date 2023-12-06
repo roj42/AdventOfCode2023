@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 // don't do this in real life
@@ -33,6 +34,8 @@ func main() {
 	if len(os.Args) > 2 && os.Args[2] != "" {
 		testPrefix = "t"
 	}
+
+	start := time.Now()
 
 	filePrefix := strings.Split(dayInput, "_")[0]
 	//open the day's file, and close it when we're done with main, here.
@@ -68,8 +71,15 @@ func main() {
 		fmt.Println(day5(scanner, false))
 	case "5_2":
 		fmt.Println(day5(scanner, true))
+	case "6":
+		fmt.Println(day6(scanner, false))
+	case "6_2":
+		fmt.Println(day6(scanner, true))
 	default:
 		log("no implementation for day: " + dayInput)
+
 	}
+	stop := time.Since(start)
+	log("time", stop.String())
 
 }

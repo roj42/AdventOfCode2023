@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type gardeningException struct {
@@ -50,8 +49,6 @@ func (gm gardeningMap) find(src int64, stickyFind gardeningException) (int64, ga
 }
 
 func day5(scanner *bufio.Scanner, part2 bool) string {
-	start := time.Now()
-	//day 5 is different. We'll need a list of seeds, and 7(!) maps
 	seeds := []int64{}
 	seed2soil := gardeningMap{}
 	soil2fert := gardeningMap{}
@@ -174,8 +171,7 @@ func day5(scanner *bufio.Scanner, part2 bool) string {
 			}
 		}
 	}
-	stop := time.Since(start)
-	log("time", stop.String())
+
 	return fmt.Sprint(lowestResult)
 }
 
