@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type gardeningException struct {
@@ -27,21 +28,29 @@ func NewGardeningException(input []int64) gardeningException {
 // a gardening map is a list of exceptions
 type gardeningMap []gardeningException
 
-func (gm gardeningMap) find(src int64) int64 {
+func (gm gardeningMap) find(src int64, stickyFind gardeningException) (int64, gardeningException) {
+	//0th, try sticky find first
+	if stickyFind != (gardeningException{}) {
+		if src >= stickyFind.source && src < stickyFind.source+stickyFind.span {
+			//hurray, calculate the map. It's the distants (difference) between the span start and our target
+			return stickyFind.dest + (src - stickyFind.source), stickyFind
+		}
+	}
 	//first, see if our src is within any span range
 	for _, except := range gm {
 		//is it greater equal source, but less than the sum of the start+span, it's in!
 		if src >= except.source && src < except.source+except.span {
 			//hurray, calculate the map. It's the distants (difference) between the span start and our target
-			return except.dest + (src - except.source)
+			stickyFind = except
+			return except.dest + (src - except.source), stickyFind
 		}
 	}
 	//nope! straight across
-	return src
+	return src, gardeningException{}
 }
 
 func day5(scanner *bufio.Scanner, part2 bool) string {
-
+	start := time.Now()
 	//day 5 is different. We'll need a list of seeds, and 7(!) maps
 	seeds := []int64{}
 	seed2soil := gardeningMap{}
@@ -116,18 +125,33 @@ func day5(scanner *bufio.Scanner, part2 bool) string {
 			fmt.Print("\n+")
 			seedStart := seeds[i-1]
 			seedEnd := seedStart + seedPart
+			sf1 := gardeningException{}
+			sf2 := gardeningException{}
+			sf3 := gardeningException{}
+			sf4 := gardeningException{}
+			sf5 := gardeningException{}
+			sf6 := gardeningException{}
+			sf7 := gardeningException{}
+
 			for seed := seedStart; seed < seedEnd; seed++ {
 				if seed%1000000 == 0 {
 					fmt.Print(".")
 				}
 				//I could get one-line-cute, here, but the compiler will do it for me. Thanks, compiler!
-				soil := seed2soil.find(seed)
-				fert := soil2fert.find(soil)
-				agua := fert2agua.find(fert)
-				suns := agua2suns.find(agua)
-				temp := suns2temp.find(suns)
-				damp := temp2damp.find(temp)
-				spot := damp2spot.find(damp)
+				soil, sf := seed2soil.find(seed, sf1)
+				sf1 = sf
+				fert, sf := soil2fert.find(soil, sf2)
+				sf2 = sf
+				agua, sf := fert2agua.find(fert, sf3)
+				sf3 = sf
+				suns, sf := agua2suns.find(agua, sf4)
+				sf4 = sf
+				temp, sf := suns2temp.find(suns, sf5)
+				sf5 = sf
+				damp, sf := temp2damp.find(temp, sf6)
+				sf6 = sf
+				spot, sf := damp2spot.find(damp, sf7)
+				sf7 = sf
 				if spot < lowestResult {
 					lowestResult = spot
 				}
@@ -138,19 +162,20 @@ func day5(scanner *bufio.Scanner, part2 bool) string {
 		for _, seed := range seeds {
 
 			//I could get one-line-cute, here, but the compiler will do it for me. Thanks, compiler!
-			soil := seed2soil.find(seed)
-			fert := soil2fert.find(soil)
-			agua := fert2agua.find(fert)
-			suns := agua2suns.find(agua)
-			temp := suns2temp.find(suns)
-			damp := temp2damp.find(temp)
-			spot := damp2spot.find(damp)
+			soil, _ := seed2soil.find(seed, gardeningException{})
+			fert, _ := soil2fert.find(soil, gardeningException{})
+			agua, _ := fert2agua.find(fert, gardeningException{})
+			suns, _ := agua2suns.find(agua, gardeningException{})
+			temp, _ := suns2temp.find(suns, gardeningException{})
+			damp, _ := temp2damp.find(temp, gardeningException{})
+			spot, _ := damp2spot.find(damp, gardeningException{})
 			if spot < lowestResult {
 				lowestResult = spot
 			}
 		}
 	}
-
+	stop := time.Since(start)
+	log("time", stop.String())
 	return fmt.Sprint(lowestResult)
 }
 
