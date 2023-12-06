@@ -7,12 +7,15 @@ import (
 	"strings"
 )
 
+// don't do this in real life
 func check(e error) {
 	if e != nil {
 		panic(e)
 	}
 }
 
+// don't do this in real life
+// actually this is PROBABLY kind of okay.
 func log(inputs ...any) {
 	fmt.Println(inputs...)
 }
@@ -25,6 +28,7 @@ func main() {
 	}
 	dayInput := os.Args[1]
 
+	//any second prefix means load the test file
 	testPrefix := ""
 	if len(os.Args) > 2 && os.Args[2] != "" {
 		testPrefix = "t"
@@ -60,6 +64,10 @@ func main() {
 		fmt.Println(day4(scanner))
 	case "4_2":
 		fmt.Println(day4_2(scanner))
+	case "5":
+		fmt.Println(day5(scanner, false))
+	case "5_2":
+		fmt.Println(day5(scanner, true))
 	default:
 		log("no implementation for day: " + dayInput)
 	}

@@ -21,6 +21,23 @@ func day3(scanner *bufio.Scanner) string {
 	for scanner.Scan() {
 		fmt.Println(scanner.Text())
 		schematic = append(schematic, scanner.Bytes())
+
+		// count := 0
+		// stringSchem := []string{}
+		// testSchem := [][]byte{}
+		// for scanner.Scan() {
+		// 	fmt.Println(scanner.Text())
+		// 	schematic = append(schematic, scanner.Bytes())
+		// 	stringSchem = append(stringSchem, scanner.Text())
+		// 	bitey := make([]byte, 140)
+		// 	copy(bitey, scanner.Bytes())
+		// 	testSchem = append(testSchem, bitey)
+
+		// 	count++
+		// 	if count == 29 {
+		// 		log("woah")
+		// 	}
+
 	}
 	//did we error in there somewhere?
 	if err := scanner.Err(); err != nil {
