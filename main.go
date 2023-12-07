@@ -75,6 +75,8 @@ func main() {
 		fmt.Println(day6(scanner, false))
 	case "6_2":
 		fmt.Println(day6(scanner, true))
+	case "7":
+		fmt.Println(day7(scanner))
 	default:
 		log("no implementation for day: " + dayInput)
 
