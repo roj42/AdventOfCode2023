@@ -16,8 +16,8 @@ type handAndBid struct {
 	Score int64
 }
 
-func day7(scanner *bufio.Scanner, isDay2 bool) string {
-	if isDay2 {
+func day7(scanner *bufio.Scanner, isPart2 bool) string {
+	if isPart2 {
 		cardSymbolMask = jokersWildMask
 	}
 
@@ -31,7 +31,7 @@ func day7(scanner *bufio.Scanner, isDay2 bool) string {
 			Bid:  toInts(input[1])[0],
 		}
 		//score it up. This is where savings will happen if you need 'em
-		scoreHand(&newHand, isDay2)
+		scoreHand(&newHand, isPart2)
 		handData = append(handData, newHand)
 
 	}
