@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 	"sync"
 )
@@ -44,66 +45,89 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 		theAList = append(theAList, "AAA")
 	}
 
-	//walk that route. Count your steps
-	stepCount := 0
-	repeats := 0
-
 	//let's get cute with go routines!
-	var wg sync.WaitGroup
 
 	//make a list of current nodes based on number of starters
 	curNodes := []connectionMap{}
-	for _, nodeName := range theAList {
+	ghostChans := make([]chan int, len(theAList))
+
+	for i, nodeName := range theAList {
 		curNodes = append(curNodes, desertMap[nodeName])
+		ghostChans[i] = make(chan int, 10000)
 
 	}
 
-	for ; ; stepCount++ {
-		//do we need to repeat?
-		if stepCount == len(route) {
-			repeats++
-			if repeats%1000 == 0 {
-				fmt.Print(".")
+	var wg sync.WaitGroup
+	//THE LISTENER
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var state = make([]int, len(ghostChans))
+		lowest := math.MaxInt
+		lowI := -1
+		//read one set, record lowest
+		for i := range state {
+			state[i] = <-ghostChans[i]
+			if state[i] < lowest {
+				lowest = state[i]
+				lowI = i
 			}
-			stepCount = 0
-			// fmt.Print("\nRepeat", repeats, ":")
 		}
-		nextStep := route[stepCount]
-		success := true
-		// fmt.Print("\nStep", stepCount, ":")
-		var mu sync.Mutex
-		for i := range curNodes {
-			wg.Add(1)
-			//avoid memory collision here
-			i := i
-			go func() {
-				defer wg.Done()
+
+		//start loopin'. If we're equal, great. if not re-fetch the lowest and try again
+		for {
+			if allValuesEqual(state) {
+				log("ANSWER", state[0])
+				return
+			}
+			state[lowI] = <-ghostChans[lowI]
+
+			lowest := math.MaxInt
+
+			for i := range state {
+				if state[i] < lowest {
+					lowest = state[i]
+					lowI = i
+				}
+			}
+		}
+	}()
+
+	sparkle := "!@#$%^&*(."
+	for i := range curNodes {
+		//avoid memory collision here
+		i := i
+		go func() {
+			//walk that route. Count your steps
+			stepCount := 0
+			repeats := 0
+
+			for ; ; stepCount++ {
+				//do we need to repeat?
+				if stepCount == len(route) {
+					repeats++
+					if repeats%10000 == 0 {
+						fmt.Print(string(sparkle[i]))
+					}
+					stepCount = 0
+					// fmt.Print("\nRepeat", repeats, ":")
+				}
+				nextStep := route[stepCount]
+				// fmt.Print("\nStep", stepCount, ":")
 				//race condition against success, but who cares? if anyone fails, we all fail
-				if (!isPart2 && curNodes[i][nextStep] != "ZZZ") ||
-					(isPart2 && curNodes[i][nextStep][2] != 'Z') { // [][][] lol
-					mu.Lock()
-					success = false
-					mu.Unlock()
+				if (!isPart2 && curNodes[i][nextStep] == "ZZZ") ||
+					(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
+					// log("hello from ", i, curNodes[i][nextStep], repeats*len(route)+stepCount+1)
+
+					ghostChans[i] <- repeats*len(route) + stepCount + 1 //+1 'cause the next step is actually z
 				}
 				//all together now, step!
 				curNodes[i] = desertMap[curNodes[i][nextStep]]
-
-			}()
-		}
-		wg.Wait()
-
-		if success {
-			//it's the NEXT step that succedes
-			stepCount++
-			break
-		}
-
+			}
+		}()
 	}
-
-	//We've arrived! how long did that take?
-	grandTotal := repeats*len(route) + stepCount
-
-	return fmt.Sprint("\ntotal steps ", grandTotal)
+	wg.Wait()
+	return "\ndone?"
 }
 
 func parseLineDay8(input string) (nodeName string, connections connectionMap) {
@@ -118,4 +142,14 @@ func parseLineDay8(input string) (nodeName string, connections connectionMap) {
 	connections['L'] = strings.Trim(nodeParts[0], " ()")
 	connections['R'] = strings.Trim(nodeParts[1], " ()")
 	return
+}
+
+func allValuesEqual(state []int) bool {
+	val := state[0]
+	for _, v := range state {
+		if val != v {
+			return false
+		}
+	}
+	return true
 }
