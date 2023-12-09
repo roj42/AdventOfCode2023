@@ -103,31 +103,22 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 			//walk that route. Count your steps
 			stepCount := 0
 			repeats := 0
+			endCount := 0
 
 			for ; ; stepCount++ {
 				//do we need to repeat?
 				if stepCount == len(route) {
 					repeats++
-					if repeats%10000 == 0 {
-						fmt.Print(string(sparkle[i]))
-					}
 					stepCount = 0
-					// fmt.Print("\nRepeat", repeats, ":")
 				}
 				nextStep := route[stepCount]
-				// fmt.Print("\nStep", stepCount, ":")
-				//race condition against success, but who cares? if anyone fails, we all fail
 				if (!isPart2 && curNodes[i][nextStep] == "ZZZ") ||
 					(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
-					// log("hello from ", i, curNodes[i][nextStep], repeats*len(route)+stepCount+1)
-					// fmt.Print(".")
-					// select {
-					// case <blah code blah>:
 					ghostChans[i] <- repeats*len(route) + stepCount + 1 //+1 'cause the next step is actually z
-					// default:
-					// 	fmt.Print(string(sparkle[i]), "Channel full. Discarding value")
-					// }
-
+					endCount++
+					if endCount%10000 == 0 {
+						fmt.Print(string(sparkle[i]))
+					}
 				}
 				//all together now, step!
 				curNodes[i] = desertMap[curNodes[i][nextStep]]
