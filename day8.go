@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"math"
 	"strings"
 	"sync"
 )
@@ -63,33 +62,36 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 	go func() {
 		defer wg.Done()
 		var state = make([]int, len(ghostChans))
-		lowest := math.MaxInt
-		lowI := -1
-		//read one set, record lowest
+		highest := -1
+		//read one set, record highest
 		for i := range state {
 			state[i] = <-ghostChans[i]
-			if state[i] < lowest {
-				lowest = state[i]
-				lowI = i
+			if state[i] > highest {
+				highest = state[i]
 			}
 		}
 
-		//start loopin'. If we're equal, great. if not re-fetch the lowest and try again
-		for {
+		//start loopin'. If we're equal, great. if not re-fetch all but the highest
+		for c := 0; ; c++ {
 			if allValuesEqual(state) {
 				log("ANSWER", state[0])
 				return
 			}
-			state[lowI] = <-ghostChans[lowI]
 
-			lowest := math.MaxInt
-
+			if c%10000 == 0 {
+				fmt.Print("()O()", len(ghostChans[0]))
+			}
+			highNew := -1
 			for i := range state {
-				if state[i] < lowest {
-					lowest = state[i]
-					lowI = i
+				if state[i] < highest {
+					state[i] = <-ghostChans[i]
+					if state[i] > highNew {
+						highNew = state[i]
+
+					}
 				}
 			}
+			highest = highNew
 		}
 	}()
 
@@ -118,8 +120,14 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 				if (!isPart2 && curNodes[i][nextStep] == "ZZZ") ||
 					(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
 					// log("hello from ", i, curNodes[i][nextStep], repeats*len(route)+stepCount+1)
-
+					// fmt.Print(".")
+					// select {
+					// case <blah code blah>:
 					ghostChans[i] <- repeats*len(route) + stepCount + 1 //+1 'cause the next step is actually z
+					// default:
+					// 	fmt.Print(string(sparkle[i]), "Channel full. Discarding value")
+					// }
+
 				}
 				//all together now, step!
 				curNodes[i] = desertMap[curNodes[i][nextStep]]
