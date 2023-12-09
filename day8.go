@@ -5,33 +5,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"math"
 	"strings"
-	"sync"
 )
 
 const sparkle = "!@#$%^&*("
 
 type connectionMap map[byte]string
-type Container struct {
-	mu      sync.Mutex
-	answers []int
-}
-
-func (c *Container) init() {
-	for i := range c.answers {
-		c.answers[i] = math.MaxInt
-	}
-}
-
-func (c *Container) submit(i, amt int) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if amt < c.answers[i] {
-		fmt.Print("(" + string(sparkle[i]) + " is done: " + fmt.Sprint(amt) + ")")
-		c.answers[i] = amt
-	}
-}
 
 func day8(scanner *bufio.Scanner, isPart2 bool) string {
 
@@ -79,27 +58,18 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 
 	}
 
-	var wg sync.WaitGroup
-	c := Container{
-		answers: make([]int, len(curNodes)),
-	}
-
-	c.init()
+	answers := make([]int, len(curNodes))
 	for i := range curNodes {
 
-		// wg.Add(1)
-		// //avoid memory collision here
-		// i := i
-		// go func() {
-		// defer wg.Done()
-		//New method: record our steps, and then see if we've looped
+		//New method: record our steps, and then see if we've looped. Assume all must loop.
 		stepCount := 0
 		repeats := 0
 		pathRecord := []byte{}
 
+		//let's find one loop at a time
 		for ; ; stepCount++ {
 			//was the answer found?
-			if c.answers[i] != math.MaxInt {
+			if answers[i] != 0 {
 				fmt.Print("(" + string(sparkle[i]) + "OUT)")
 				break
 			}
@@ -107,14 +77,14 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 			if stepCount == len(route) {
 				repeats++
 				if repeats%100000 == 0 {
-					fmt.Print(string(sparkle[i]))
-					wg.Wait()
+					// fmt.Print(len(pathRecord), string(sparkle[i]))
+					fmt.Println(string(pathRecord))
 				}
 				stepCount = 0
 			}
 			//peek next step, and record our route
 			nextStep := route[stepCount]
-			//convert name of the node for storage
+			//store the route
 			pathRecord = append(pathRecord, curNodes[i][nextStep]...)
 
 			//is that next step a Z?
@@ -122,28 +92,18 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 				(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
 				totalSteps := repeats*len(route) + stepCount + 1 //+1 'cause the next step is actually z
 				//Now check, if we've taken an even number of steps, if we've looped
-				//we're in a loop if the front half of our record exactly matched the back.
-				//send a go routine to check this out
-				ts := totalSteps
-				//let a go routine do the heavy lifting so we can race ahead
-				wg.Add(1)
-				go func(pr []byte) {
-					defer wg.Done()
-					if ts%2 == 0 && bytes.Equal(pr[:len(pr)/2], pr[len(pr)/2:]) {
-						c.submit(i, ts/2)
-					}
-
-					// fmt.Print(".")
-				}(pathRecord)
+				//we're in a loop if the front half of our record exactly matches the back.
+				if totalSteps%2 == 0 && bytes.Equal(pathRecord[:len(pathRecord)/2], pathRecord[len(pathRecord)/2:]) {
+					answers[i] = totalSteps / 2
+				}
 			}
 			//all together now, step!
 			curNodes[i] = desertMap[curNodes[i][nextStep]]
 		}
 
 	}
-	wg.Wait()
 	grandTotal := 1
-	for _, ans := range c.answers {
+	for _, ans := range answers {
 		grandTotal = grandTotal * ans
 	}
 	return fmt.Sprint("\n", grandTotal)
