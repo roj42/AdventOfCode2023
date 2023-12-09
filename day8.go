@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"math"
@@ -9,7 +10,28 @@ import (
 	"sync"
 )
 
+const sparkle = "!@#$%^&*("
+
 type connectionMap map[byte]string
+type Container struct {
+	mu      sync.Mutex
+	answers []int
+}
+
+func (c *Container) init() {
+	for i := range c.answers {
+		c.answers[i] = math.MaxInt
+	}
+}
+
+func (c *Container) submit(i, amt int) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if amt < c.answers[i] {
+		fmt.Print("(" + string(sparkle[i]) + " is done: " + fmt.Sprint(amt) + ")")
+		c.answers[i] = amt
+	}
+}
 
 func day8(scanner *bufio.Scanner, isPart2 bool) string {
 
@@ -58,76 +80,73 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 	}
 
 	var wg sync.WaitGroup
-	//THE LISTENER
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var state = make([]int, len(ghostChans))
-		lowest := math.MaxInt
-		lowI := -1
-		//read one set, record lowest
-		for i := range state {
-			state[i] = <-ghostChans[i]
-			if state[i] < lowest {
-				lowest = state[i]
-				lowI = i
-			}
-		}
+	c := Container{
+		answers: make([]int, len(curNodes)),
+	}
 
-		//start loopin'. If we're equal, great. if not re-fetch the lowest and try again
-		for {
-			if allValuesEqual(state) {
-				log("ANSWER", state[0])
-				return
-			}
-			state[lowI] = <-ghostChans[lowI]
-
-			lowest := math.MaxInt
-
-			for i := range state {
-				if state[i] < lowest {
-					lowest = state[i]
-					lowI = i
-				}
-			}
-		}
-	}()
-
-	sparkle := "!@#$%^&*(."
+	c.init()
 	for i := range curNodes {
-		//avoid memory collision here
-		i := i
-		go func() {
-			//walk that route. Count your steps
-			stepCount := 0
-			repeats := 0
 
-			for ; ; stepCount++ {
-				//do we need to repeat?
-				if stepCount == len(route) {
-					repeats++
-					if repeats%10000 == 0 {
-						fmt.Print(string(sparkle[i]))
-					}
-					stepCount = 0
-					// fmt.Print("\nRepeat", repeats, ":")
-				}
-				nextStep := route[stepCount]
-				// fmt.Print("\nStep", stepCount, ":")
-				//race condition against success, but who cares? if anyone fails, we all fail
-				if (!isPart2 && curNodes[i][nextStep] == "ZZZ") ||
-					(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
-					// log("hello from ", i, curNodes[i][nextStep], repeats*len(route)+stepCount+1)
+		// wg.Add(1)
+		// //avoid memory collision here
+		// i := i
+		// go func() {
+		// defer wg.Done()
+		//New method: record our steps, and then see if we've looped
+		stepCount := 0
+		repeats := 0
+		pathRecord := []byte{}
 
-					ghostChans[i] <- repeats*len(route) + stepCount + 1 //+1 'cause the next step is actually z
-				}
-				//all together now, step!
-				curNodes[i] = desertMap[curNodes[i][nextStep]]
+		for ; ; stepCount++ {
+			//was the answer found?
+			if c.answers[i] != math.MaxInt {
+				fmt.Print("(" + string(sparkle[i]) + "OUT)")
+				break
 			}
-		}()
+			//do we need to repeat?
+			if stepCount == len(route) {
+				repeats++
+				if repeats%100000 == 0 {
+					fmt.Print(string(sparkle[i]))
+					wg.Wait()
+				}
+				stepCount = 0
+			}
+			//peek next step, and record our route
+			nextStep := route[stepCount]
+			//convert name of the node for storage
+			pathRecord = append(pathRecord, curNodes[i][nextStep]...)
+
+			//is that next step a Z?
+			if (!isPart2 && curNodes[i][nextStep] == "ZZZ") ||
+				(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
+				totalSteps := repeats*len(route) + stepCount + 1 //+1 'cause the next step is actually z
+				//Now check, if we've taken an even number of steps, if we've looped
+				//we're in a loop if the front half of our record exactly matched the back.
+				//send a go routine to check this out
+				ts := totalSteps
+				//let a go routine do the heavy lifting so we can race ahead
+				wg.Add(1)
+				go func(pr []byte) {
+					defer wg.Done()
+					if ts%2 == 0 && bytes.Equal(pr[:len(pr)/2], pr[len(pr)/2:]) {
+						c.submit(i, ts/2)
+					}
+
+					// fmt.Print(".")
+				}(pathRecord)
+			}
+			//all together now, step!
+			curNodes[i] = desertMap[curNodes[i][nextStep]]
+		}
+
 	}
 	wg.Wait()
-	return "\ndone?"
+	grandTotal := 1
+	for _, ans := range c.answers {
+		grandTotal = grandTotal * ans
+	}
+	return fmt.Sprint("\n", grandTotal)
 }
 
 func parseLineDay8(input string) (nodeName string, connections connectionMap) {
