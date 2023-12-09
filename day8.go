@@ -52,7 +52,7 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 
 	for i, nodeName := range theAList {
 		curNodes = append(curNodes, desertMap[nodeName])
-		ghostChans[i] = make(chan int, 10000)
+		ghostChans[i] = make(chan int)
 
 	}
 
@@ -116,6 +116,7 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 					(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
 					ghostChans[i] <- repeats*len(route) + stepCount + 1 //+1 'cause the next step is actually z
 					endCount++
+					fmt.Print("|", string(stepCount))
 					if endCount%10000 == 0 {
 						fmt.Print(string(sparkle[i]))
 					}
