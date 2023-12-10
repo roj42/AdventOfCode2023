@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 )
 
 type connectionMap map[byte]string
@@ -48,86 +47,44 @@ func day8(scanner *bufio.Scanner, isPart2 bool) string {
 
 	//make a list of current nodes based on number of starters
 	curNodes := []connectionMap{}
-	ghostChans := make([]chan int, len(theAList))
 
-	for i, nodeName := range theAList {
+	for _, nodeName := range theAList {
 		curNodes = append(curNodes, desertMap[nodeName])
-		ghostChans[i] = make(chan int)
 
 	}
-
-	var wg sync.WaitGroup
-	//THE LISTENER
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var state = make([]int, len(ghostChans))
-		highest := -1
-		//read one set, record highest
-		for i := range state {
-			state[i] = <-ghostChans[i]
-			if state[i] > highest {
-				highest = state[i]
-			}
-		}
-
-		//start loopin'. If we're equal, great. if not re-fetch all but the highest
-		for c := 0; ; c++ {
-			if allValuesEqual(state) {
-				log("ANSWER", state[0])
-				return
-			}
-
-			if c%10000 == 0 {
-				fmt.Print("()O()", len(ghostChans[0]))
-			}
-			highNew := -1
-			for i := range state {
-				if state[i] < highest {
-					state[i] = <-ghostChans[i]
-					if state[i] > highNew {
-						highNew = state[i]
-
-					}
-				}
-			}
-			highest = highNew
-		}
-	}()
 
 	sparkle := "!@#$%^&*(."
+	answers := []int{}
 	for i := range curNodes {
-		//avoid memory collision here
-		i := i
-		go func() {
-			//walk that route. Count your steps
-			stepCount := 0
-			repeats := 0
-			endCount := 0
 
-			for ; ; stepCount++ {
-				//do we need to repeat?
-				if stepCount == len(route) {
-					repeats++
-					stepCount = 0
-				}
-				nextStep := route[stepCount]
-				if (!isPart2 && curNodes[i][nextStep] == "ZZZ") ||
-					(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
-					ghostChans[i] <- repeats*len(route) + stepCount + 1 //+1 'cause the next step is actually z
-					endCount++
-					fmt.Print("|", string(stepCount))
-					if endCount%10000 == 0 {
-						fmt.Print(string(sparkle[i]))
-					}
-				}
-				//all together now, step!
-				curNodes[i] = desertMap[curNodes[i][nextStep]]
+		//walk that route. Count your steps
+		stepCount := 0
+		repeats := 0
+
+		for ; ; stepCount++ {
+			//do we need to repeat?
+			if stepCount == len(route) {
+				repeats++
+				stepCount = 0
 			}
-		}()
+			nextStep := route[stepCount]
+			if (!isPart2 && curNodes[i][nextStep] == "ZZZ") ||
+				(isPart2 && curNodes[i][nextStep][2] == 'Z') { // [][][] lol
+				fmt.Println("(", string(sparkle[i]), fmt.Sprint(stepCount), "|", fmt.Sprint(repeats), "^", fmt.Sprint((repeats*len(route))+stepCount+1))
+				answers = append(answers, (repeats*len(route))+stepCount+1)
+				break
+			}
+			//all together now, step!
+			curNodes[i] = desertMap[curNodes[i][nextStep]]
+		}
 	}
-	wg.Wait()
-	return "\ndone?"
+	log("done?")
+	grandTotal := LCM(answers[0], answers[1])
+	if len(answers) > 2 {
+		grandTotal = LCM(answers[0], answers[1], answers[2:]...)
+	}
+
+	return fmt.Sprint(grandTotal)
 }
 
 func parseLineDay8(input string) (nodeName string, connections connectionMap) {
@@ -144,12 +101,22 @@ func parseLineDay8(input string) (nodeName string, connections connectionMap) {
 	return
 }
 
-func allValuesEqual(state []int) bool {
-	val := state[0]
-	for _, v := range state {
-		if val != v {
-			return false
-		}
+func LCM(a, b int, integers ...int) int {
+	result := a * b / GCD(a, b)
+
+	for i := 0; i < len(integers); i++ {
+		result = LCM(result, integers[i])
 	}
-	return true
+
+	return result
+}
+
+// greatest common divisor (GCD) via Euclidean algorithm
+func GCD(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
 }
