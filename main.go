@@ -32,7 +32,7 @@ func main() {
 	//any second prefix means load the test file
 	testPrefix := ""
 	if len(os.Args) > 2 && os.Args[2] != "" {
-		testPrefix = "t"
+		testPrefix = os.Args[2]
 	}
 
 	start := time.Now()
@@ -89,6 +89,8 @@ func main() {
 		fmt.Println(day9(scanner, true))
 	case "10":
 		fmt.Println(day10(scanner, false))
+	case "10_2":
+		fmt.Println(day10(scanner, true))
 	default:
 		log("no implementation for day: " + dayInput)
 

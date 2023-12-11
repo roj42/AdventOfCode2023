@@ -111,7 +111,7 @@ func nav(at coord, to dir) coord {
 }
 
 func (d diagram) at(at coord) byte {
-	if at.x < 0 || at.y < 0 || at.x+1 > len(d[at.x]) || at.y+1 > len(d) {
+	if at.x < 0 || at.y < 0 || at.y+1 > len(d) || at.x+1 > len(d[at.y]) {
 		return '!'
 	}
 	return d[at.y][at.x]
@@ -188,5 +188,6 @@ func day10(scanner *bufio.Scanner, isPart2 bool) string {
 		log("we went", fmt.Sprint(count), "so half that")
 		return fmt.Sprint(count / 2)
 	}
+	log("A path ", fmt.Sprint(count), "long")
 	return "2"
 }
