@@ -150,6 +150,7 @@ func day10(scanner *bufio.Scanner, isPart2 bool) string {
 
 	//find a next from S
 	next := coord{0, 0}
+	log("starting with default next", next)
 	var workingDir dir = NOPE
 	for { //sloppy if else saver
 		righty := nav(startPoint, RIGHT)

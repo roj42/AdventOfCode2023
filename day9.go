@@ -17,7 +17,7 @@ func day9(scanner *bufio.Scanner, isPart2 bool) string {
 		workSpace := [][]int{}
 
 		//We got ints
-		workSpace = append(workSpace, toInts(scanner.Text()))
+		workSpace = append(workSpace, toInts(scanner.Text(), " "))
 		//now calculate differences and append, loop until we get all zeroes
 		for i := 0; ; i++ {
 			newRow := []int{}

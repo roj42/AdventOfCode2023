@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"math"
-	"slices"
 )
 
 // we can reuse universeram, but then we'd never have a STARMAP
@@ -37,7 +36,6 @@ func day11(scanner *bufio.Scanner, isPart2 bool) string {
 		}
 	}
 	log("found clear rows:", len(clearRows))
-	// universe.addRowsAfter(clearRows)
 
 	clearCols := []int{}
 	for i := range universe[0] {
@@ -46,7 +44,6 @@ func day11(scanner *bufio.Scanner, isPart2 bool) string {
 		}
 	}
 	log("found clear columns:", len(clearCols))
-	// universe.addColsAfter(clearCols)
 
 	log("expanded universe is ", len(universe)+len(clearRows), "by", len(universe[0])+len(clearCols))
 
@@ -92,12 +89,6 @@ func findSymbols(grid [][]byte, sym byte) (coordList []coord) {
 	return
 }
 
-func (s starmap) vis() {
-	for _, r := range s {
-		log(string(r))
-	}
-}
-
 func (s starmap) colClearofGalaxies(colX int) bool {
 	for rowY := range s {
 		if s.at(coord{y: rowY, x: colX}) != '.' {
@@ -107,21 +98,6 @@ func (s starmap) colClearofGalaxies(colX int) bool {
 	return true
 }
 
-// expands a startmap vertically by doubling rows given
-func (s *starmap) addColsAfter(cols []int) {
-	//let's make sure we're in reverse order here:
-	slices.Sort(cols)
-	slices.Reverse(cols)
-	for row := range *s {
-		for _, c := range cols {
-			//double the row in one append, by appending 0toX with XtoEnd, two X-es
-			new := append((*s)[row][:c+1], (*s)[row][c:]...)
-			(*s)[row] = new
-		}
-	}
-
-}
-
 func (s starmap) rowClearOfGalaxies(rowY int) bool {
 	for colX := range s[rowY] {
 		if s.at(coord{y: rowY, x: colX}) != '.' {
@@ -129,17 +105,6 @@ func (s starmap) rowClearOfGalaxies(rowY int) bool {
 		}
 	}
 	return true
-}
-
-// expands a startmap vertically by doubling rows given
-func (s *starmap) addRowsAfter(rows []int) {
-	//let's make sure we're in reverse order here:
-	slices.Sort(rows)
-	slices.Reverse(rows)
-	for _, r := range rows {
-		new := append((*s)[:r+1], (*s)[r:]...)
-		*s = new
-	}
 }
 
 // at gives you what's there, unless it's off the map, then it saves you.

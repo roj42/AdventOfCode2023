@@ -28,7 +28,7 @@ func day7(scanner *bufio.Scanner, isPart2 bool) string {
 		input := strings.Split(scanner.Text(), " ")
 		newHand := handAndBid{
 			Hand: input[0],
-			Bid:  toInts(input[1])[0],
+			Bid:  toInts(input[1], " ")[0],
 		}
 		//score it up. This is where savings will happen if you need 'em
 		scoreHand(&newHand, isPart2)

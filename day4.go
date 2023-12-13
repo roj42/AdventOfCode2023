@@ -52,14 +52,14 @@ func splitListsDay4(line string) (winners, available []int) {
 	gameAndLeft := strings.Split(halves[0], ":")
 	halves[0] = gameAndLeft[1]
 	//now let's turn these into lists of numbers
-	winners = toInts(strings.Trim(halves[0], " "))
-	available = toInts(strings.Trim(halves[1], " "))
+	winners = toInts(strings.Trim(halves[0], " "), " ")
+	available = toInts(strings.Trim(halves[1], " "), " ")
 	return
 }
 
-func toInts(stringOfInts string) []int {
+func toInts(stringOfInts, splitOn string) []int {
 	listOfInts := []int{}
-	for _, str := range strings.Split(stringOfInts, " ") {
+	for _, str := range strings.Split(stringOfInts, splitOn) {
 		//note that we might have bonus spaces for single digit numbers, so skip those
 		if str == "" {
 			continue
