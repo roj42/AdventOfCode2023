@@ -29,6 +29,9 @@ func day12(scanner *bufio.Scanner, isPart2 bool) string {
 			checkParts = append(checkParts, smChe...)
 		}
 
+		if condition == ".#?..#?#?#.." {
+			log("fart")
+		}
 		checks := binMask(checkParts)
 		// try every combo of working or not, then test it to see if it's okay
 
@@ -70,6 +73,10 @@ func binMask(checks []int) (binChecks int) {
 // create a nice new string, by swapping combination's charaters for conditions, and then compare to check.
 func checkCombination(condition, combination string, checks int) bool {
 
+	if condition == ".#?..#?#?#.." {
+		log("fart")
+	}
+
 	//build out the replacement, swapping characters in combination for ? in condition
 	for _, c := range combination {
 		//replace the first (remaining) question mark
@@ -106,7 +113,7 @@ func GenerateCombinations(length int) <-chan string {
 	// feeding them to the channel c
 	go func(c chan string) {
 		defer close(c) // Once the iteration function is finished, we close the channel
-		for i := 1; bits.Len(uint(i)) <= length; i++ {
+		for i := 0; bits.Len(uint(i)) <= length; i++ {
 			prePad := reverseMask(i)
 			postPad := PadLeft(prePad, ".", length)
 			c <- postPad
