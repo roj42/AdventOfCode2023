@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"sort"
-	"time"
 )
 
 const ROCK = 'O'
@@ -32,22 +31,38 @@ func day14(scanner *bufio.Scanner, isPart2 bool) string {
 	}
 
 	if isPart2 {
-		start := time.Now()
 		log("it sure is part 2")
 		//start cyclin
-		for i := 0; i < 1000000000; i++ {
+		snapShots := []string{}
+		snapShot := ""
+		for _, line := range platform {
+			snapShot = snapShot + line
+		}
+		snapShots = append(snapShots, snapShot)
+
+		for i := 0; i < 1000; i++ {
+
 			platform.tilt(UP)
 			platform.tilt(LEFT)
 			platform.tilt(DOWN)
 			platform.tilt(RIGHT)
+			snapShot := ""
+			for _, line := range platform {
+				snapShot = snapShot + line
+			}
 			if i%10000 == 0 {
-				fmt.Print("k")
+				for j, ss := range snapShots {
+					if snapShot == ss {
+						log("cycle", i, "is the same as", j)
+						// break
+						return fmt.Sprint(platform.weigh(UP))
+					}
+				}
 			}
-			if i%1000000 == 0 {
-				stop := time.Since(start)
-				log("one Million", stop)
+			snapShots = append(snapShots, snapShot)
+			if len(snapShots) > 1000 {
+				snapShots = snapShots[:1000]
 			}
-
 		}
 	} else {
 		platform.tilt(UP)
