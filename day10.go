@@ -17,6 +17,20 @@ type diagram [][]byte
 
 type dir byte
 
+func (d dir) getCoord() coord {
+	switch d {
+	case UP:
+		return coord{y: -1}
+	case DOWN:
+		return coord{y: 1}
+	case LEFT:
+		return coord{x: -1}
+	case RIGHT:
+		return coord{x: 1}
+	}
+	return coord{}
+}
+
 const DOWN dir = 'd'
 const UP dir = 'u'
 const LEFT dir = 'l'
