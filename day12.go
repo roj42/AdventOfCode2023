@@ -29,9 +29,9 @@ func day12(scanner *bufio.Scanner, isPart2 bool) string {
 			checkParts = append(checkParts, smChe...)
 		}
 
-		if condition == ".#?..#?#?#.." {
-			log("fart")
-		}
+		// if condition == ".#?..#?#?#.." {
+		// 	log("fart")
+		// }
 		checks := binMask(checkParts)
 		// try every combo of working or not, then test it to see if it's okay
 
@@ -73,9 +73,9 @@ func binMask(checks []int) (binChecks int) {
 // create a nice new string, by swapping combination's charaters for conditions, and then compare to check.
 func checkCombination(condition, combination string, checks int) bool {
 
-	if condition == ".#?..#?#?#.." {
-		log("fart")
-	}
+	// if condition == ".#?..#?#?#.." {
+	// 	log("fart")
+	// }
 
 	//build out the replacement, swapping characters in combination for ? in condition
 	for _, c := range combination {
