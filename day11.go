@@ -6,7 +6,7 @@ import (
 	"math"
 )
 
-// we can reuse universeram, but then we'd never have a STARMAP
+// we can reuse diagram, but then we'd never have a STARMAP
 type starmap [][]byte
 
 var EXPAND_O_FACTOR = 1
