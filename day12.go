@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/bits"
 	"strings"
 )
 
@@ -36,12 +37,12 @@ func day12(scanner *bufio.Scanner, isPart2 bool) string {
 
 		//generate combos
 		good := 0
-		for combination := range GenerateCombinations(".#", qMarks) {
+		for combination := range GenerateCombinations(qMarks) {
 			if checkCombination(condition, combination, checks) {
 				good += 1
 			}
 		}
-		log(condition, checks, "\t\tgood:", good)
+		log(condition, checkParts, "good:", good)
 		grandTotal += good
 	}
 
@@ -76,18 +77,22 @@ func checkCombination(condition, combination string, checks int) bool {
 	}
 	//is it answer? let's make a checks for this combo:
 	condChecks := 0
-	wasHash := false
+	wasNotHash := false
+
 	for v, c := range condition {
 		if c == '#' {
-			wasHash = true
+			if wasNotHash {
+				condChecks = condChecks << 1
+			}
 			condChecks++
 			if v < len(condition)-1 {
 				condChecks = condChecks << 1
 			}
+			wasNotHash = false
 		} else {
-			if wasHash {
-				condChecks = condChecks << 1
-				wasHash = true
+			wasNotHash = true
+			if v == len(condition)-1 { //one too many crank overs, and we're ending with a dot (or run of dots)
+				condChecks = condChecks >> 1
 			}
 		}
 	}
@@ -95,35 +100,39 @@ func checkCombination(condition, combination string, checks int) bool {
 	return condChecks == checks
 }
 
-// a bit of borrowed code:
-func GenerateCombinations(alphabet string, length int) <-chan string {
-	c := make(chan string, 2)
-
+func GenerateCombinations(length int) <-chan string {
+	c := make(chan string)
 	// Starting a separate goroutine that will create all the combinations,
 	// feeding them to the channel c
 	go func(c chan string) {
 		defer close(c) // Once the iteration function is finished, we close the channel
-
-		AddLetter(c, "", alphabet, length) // We start by feeding it an empty string
+		for i := 1; bits.Len(uint(i)) <= length; i++ {
+			prePad := reverseMask(i)
+			postPad := PadLeft(prePad, ".", length)
+			c <- postPad
+		}
 	}(c)
-
-	return c // Return the channel to the calling function
+	return c
 }
 
-// AddLetter adds a letter to the combination to create a new combination.
-// This new combination is passed on to the channel before we call AddLetter once again
-// to add yet another letter to the new combination in case length allows it
-func AddLetter(c chan string, combo string, alphabet string, length int) {
-	// Check if we reached the length limit
-	// If so, we just return without adding anything
-	if length <= 0 {
-		c <- combo
-		return
+func reverseMask(i int) string {
+	bytey := []byte{}
+	for i > 0 {
+		if i%2 == 0 { //is a zero, therefore .
+			bytey = append([]byte{'.'}, bytey...)
+		} else {
+			bytey = append([]byte{'#'}, bytey...)
+		}
+		i = i >> 1
 	}
+	return string(bytey)
+}
 
-	var newCombo string
-	for _, ch := range alphabet {
-		newCombo = combo + string(ch)
-		AddLetter(c, newCombo, alphabet, length-1)
+func PadLeft(str, pad string, lenght int) string {
+	for {
+		str = pad + str
+		if len(str) > lenght {
+			return str[1:]
+		}
 	}
 }
