@@ -74,30 +74,25 @@ func checkCombination(condition, combination string, checks int) bool {
 		//replace the first (remaining) question mark
 		condition = strings.Replace(condition, "?", string(c), 1)
 	}
-	// fmt.Print(".")
 	//is it answer? let's make a checks for this combo:
-	condchecks := []int{}
-	countCurDam := 0
-	for _, c := range condition {
+	condChecks := 0
+	wasHash := false
+	for v, c := range condition {
 		if c == '#' {
-			countCurDam++
-		} else { // dangerously assume a dot
-			if countCurDam > 0 {
-				condchecks = append(condchecks, countCurDam)
-				countCurDam = 0
+			wasHash = true
+			condChecks++
+			if v < len(condition)-1 {
+				condChecks = condChecks << 1
+			}
+		} else {
+			if wasHash {
+				condChecks = condChecks << 1
+				wasHash = true
 			}
 		}
 	}
-	//maybe we hit the end.
-	if countCurDam > 0 {
-		condchecks = append(condchecks, countCurDam)
-	}
 
-	if binMask(condchecks) == checks {
-		return true
-	}
-
-	return false
+	return condChecks == checks
 }
 
 // a bit of borrowed code:
