@@ -40,12 +40,17 @@ func day12(scanner *bufio.Scanner, isPart2 bool) string {
 
 		//generate combos
 		good := 0
+		count := 0
 		for combination := range GenerateCombinations(qMarks) {
 			if checkCombination(condition, combination, checks) {
 				good += 1
 			}
+			if count%1000000 == 0 {
+				fmt.Print(".")
+			}
+			count++
 		}
-		log(condition, checkParts, "good:", good)
+		log("\n", condition, checkParts, "good:", good, "out of", count)
 		grandTotal += good
 	}
 
