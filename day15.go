@@ -3,16 +3,21 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"strings"
 )
 
 func day15(scanner *bufio.Scanner, isPart2 bool) string {
 
-	grandTotal := 0
-	//day 14 is one grid
-	platform := platform{}
+	//day 15 is one giant string
+	steps := []string{}
 	for scanner.Scan() {
-		//scan until blank line
-		platform = append(platform, scanner.Text())
+		steps = strings.Split(scanner.Text(), ",")
+	}
+
+	//answer is the sum of hashes
+	grandTotal := 0
+	for _, step := range steps {
+		grandTotal += xmasHash(step)
 	}
 	//did we error in there somewhere?
 	if err := scanner.Err(); err != nil {
@@ -21,43 +26,17 @@ func day15(scanner *bufio.Scanner, isPart2 bool) string {
 
 	if isPart2 {
 		log("it sure is part 2")
-		//start cyclin
-		snapShots := []string{}
-		snapShot := ""
-		for _, line := range platform {
-			snapShot = snapShot + line
-		}
-		snapShots = append(snapShots, snapShot)
-
-		for i := 0; i < 1000; i++ {
-
-			platform.tilt(UP)
-			platform.tilt(LEFT)
-			platform.tilt(DOWN)
-			platform.tilt(RIGHT)
-			snapShot := ""
-			for _, line := range platform {
-				snapShot = snapShot + line
-			}
-			if i%10000 == 0 {
-				for j, ss := range snapShots {
-					if snapShot == ss {
-						log("cycle", i, "is the same as", j)
-						// break
-						return fmt.Sprint(platform.weigh(UP))
-					}
-				}
-			}
-			snapShots = append(snapShots, snapShot)
-			if len(snapShots) > 1000 {
-				snapShots = snapShots[:1000]
-			}
-		}
-	} else {
-		platform.tilt(UP)
 	}
 
-	grandTotal += platform.weigh(UP)
-
 	return fmt.Sprint(grandTotal)
+}
+
+func xmasHash(step string) int {
+	hash := 0
+	for _, char := range step {
+		hash += int(char)
+		hash = (hash * 17) % 256
+	}
+	log("hash of", step, "is", hash)
+	return hash
 }
