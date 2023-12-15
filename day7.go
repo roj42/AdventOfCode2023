@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"slices"
+
+	// "slices"
 	"sort"
 	"strings"
 )
@@ -197,7 +198,11 @@ func handMaptoCode(handMap map[rune]int) string {
 	for _, count := range handMap {
 		codeList = append(codeList, fmt.Sprint(count))
 	}
-	slices.Sort(codeList)
-	slices.Reverse(codeList)
+
+	sort.Strings(codeList)
+	last := len(codeList) - 1
+	for i := 0; i < len(codeList)/2; i++ {
+		codeList[i], codeList[last-i] = codeList[last-i], codeList[i]
+	}
 	return string(strings.Join(codeList, ""))
 }
