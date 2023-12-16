@@ -107,7 +107,7 @@ func (d diagram) connects(from dir, at coord) dir {
 }
 
 // just dumb math for you
-func nav(at coord, to dir) coord {
+func navTo(at coord, to dir) coord {
 	switch to {
 	case UP:
 		return coord{at.y - 1, at.x}
@@ -122,6 +122,11 @@ func nav(at coord, to dir) coord {
 	//return no movement if we couldn't move.
 	log("bad move to", string(to), "at", at)
 	return at
+}
+
+func navFrom(at coord, from dir) coord {
+	//it's just the opposite of nav to
+	return navTo(at, op(from))
 }
 
 func (d diagram) at(at coord) byte {
@@ -167,23 +172,23 @@ func day10(scanner *bufio.Scanner, isPart2 bool) string {
 	log("starting with default next", next)
 	var workingDir dir = NOPE
 	for { //sloppy if else saver
-		righty := nav(startPoint, RIGHT)
+		righty := navTo(startPoint, RIGHT)
 		if c := diag.connects(LEFT, righty); c != NOPE {
 			workingDir = LEFT
 			next = righty
 			break
 		}
-		lefty := nav(startPoint, LEFT)
+		lefty := navTo(startPoint, LEFT)
 		if c := diag.connects(RIGHT, lefty); c != NOPE {
 			next = lefty
 			break
 		}
-		upso := nav(startPoint, UP)
+		upso := navTo(startPoint, UP)
 		if c := diag.connects(DOWN, upso); c != NOPE {
 			next = upso
 			break
 		}
-		downBaby := nav(startPoint, DOWN)
+		downBaby := navTo(startPoint, DOWN)
 		if c := diag.connects(UP, downBaby); c != NOPE {
 			next = downBaby
 			break
@@ -194,7 +199,7 @@ func day10(scanner *bufio.Scanner, isPart2 bool) string {
 	count := 1
 	for ; diag.at(next) != 'S' && workingDir != NOPE; count++ {
 		workingDir = diag.connects(workingDir, next)
-		next = nav(next, workingDir)
+		next = navTo(next, workingDir)
 		workingDir = op(workingDir)
 	}
 

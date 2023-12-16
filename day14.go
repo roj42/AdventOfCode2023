@@ -12,10 +12,6 @@ const EMPT = '.'
 
 type platform []string
 
-func (p platform) Len() int {
-	return len(p)
-}
-
 func day14(scanner *bufio.Scanner, isPart2 bool) string {
 
 	grandTotal := 0
@@ -91,25 +87,6 @@ func (p platform) weigh(direction dir) (totalWeight int) {
 }
 
 func (p platform) tilt(direction dir) {
-
-	// if direction == DOWN {
-	// 	//we should go bottom up, reverse p
-	// 	for i, j := 0, len(p)-1; i < j; i, j = i+1, j-1 {
-	// 		p[i], p[j] = p[j], p[i]
-	// 	}
-	// }
-
-	// if direction == RIGHT {
-	// 	//we should go right to left, reverse each line
-	// 	//we should go bottom up, reverse line. Strings are immutable, so
-	// 	for l, line := range p {
-	// 		revLine := []byte(line)
-	// 		for i, j := 0, len(line)-1; i < j; i, j = i+1, j-1 {
-	// 			revLine[i], revLine[j] = line[j], line[i]
-	// 		}
-	// 		p[l] = string(revLine)
-	// 	}
-	// }
 
 	//make a list of indexes we can reverse.
 	rowOrder := []int{}
