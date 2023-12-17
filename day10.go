@@ -124,11 +124,6 @@ func navTo(at coord, to dir) coord {
 	return at
 }
 
-func navFrom(at coord, from dir) coord {
-	//it's just the opposite of nav to
-	return navTo(at, op(from))
-}
-
 func (d diagram) at(at coord) byte {
 	if at.x < 0 || at.y < 0 || at.y+1 > len(d) || at.x+1 > len(d[at.y]) {
 		return '!'
