@@ -44,6 +44,18 @@ func (s *symbolLocation) visit(d dir) bool {
 	}
 }
 
+func (sg *symbolGrid) reset() {
+	for y := range *sg {
+		for x := range (*sg)[y] {
+			(*sg)[y][x].visits = 0
+			(*sg)[y][x].visitFromUP = false
+			(*sg)[y][x].visitFromDOWN = false
+			(*sg)[y][x].visitFromLEFT = false
+			(*sg)[y][x].visitFromRIGHT = false
+		}
+	}
+}
+
 func (sg symbolGrid) countVisits() (int, int) {
 	total := 0
 	visited := 0
@@ -108,29 +120,60 @@ func day16(scanner *bufio.Scanner, isPart2 bool) string {
 		countY++
 	}
 
-	//let's go iterative, and set up some laser paths.
-
-	beamsToTry := []beam{{at: coord{0, 0}, from: LEFT}}
-	for i := 0; i < len(beamsToTry); i++ {
-		newBeams := contraption.zap(beamsToTry[i])
-
-		if len(newBeams) > 0 {
-			beamsToTry = append(beamsToTry, newBeams...)
-		}
-
-	}
-
 	//did we error in there somewhere?
 	if err := scanner.Err(); err != nil {
 		check(err)
 	}
-
-	// contraption.visualize(-1)
-	total, grandTotal := contraption.countVisits()
-	log("total visits", total)
-
 	if isPart2 {
-		log("it sure is part 2")
+		//create a list of starting points
+		starts := []beam{}
+		//from the left and right
+		for y := range contraption {
+			starts = append(starts, beam{at: coord{y, 0}, from: LEFT})
+			starts = append(starts, beam{at: coord{y, len(contraption[y]) - 1}, from: RIGHT})
+		}
+		//top and bottom
+		for x := range contraption[0] {
+			starts = append(starts, beam{at: coord{0, x}, from: UP})
+			starts = append(starts, beam{at: coord{len(contraption) - 1, x}, from: DOWN})
+		}
+		highest := 0
+		for _, beamStart := range starts {
+			beamsToTry := []beam{beamStart}
+			for i := 0; i < len(beamsToTry); i++ {
+				newBeams := contraption.zap(beamsToTry[i])
+
+				if len(newBeams) > 0 {
+					beamsToTry = append(beamsToTry, newBeams...)
+				}
+
+			}
+
+			// contraption.visualize(-1)
+			_, energized := contraption.countVisits()
+			if energized > highest {
+				highest = energized
+			}
+			contraption.reset()
+		}
+		grandTotal = highest
+	} else {
+
+		//let's go iterative, and set up some laser paths.
+		beamsToTry := []beam{{at: coord{0, 0}, from: LEFT}}
+		for i := 0; i < len(beamsToTry); i++ {
+			newBeams := contraption.zap(beamsToTry[i])
+
+			if len(newBeams) > 0 {
+				beamsToTry = append(beamsToTry, newBeams...)
+			}
+
+		}
+		// contraption.visualize(-1)
+		total := 0
+		total, grandTotal = contraption.countVisits()
+		log("total visits", total)
+
 	}
 
 	return fmt.Sprint(grandTotal)
